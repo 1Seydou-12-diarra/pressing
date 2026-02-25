@@ -12,16 +12,26 @@ import java.time.LocalDateTime
 @Canonical
 @ToString(includeNames = true)
 class Paiement {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    @ManyToOne
-    @JoinColumn(name = "commande_id")
-    Commande commande
 
-    BigDecimal montant
-    String modePaiement
-    LocalDateTime datePaiement
-    String reference
-}
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
+
+        @ManyToOne
+        @JoinColumn(name = "commande_id", nullable = false)
+        Commande commande
+
+        @Column(nullable = false, columnDefinition = "numeric(12,2)")
+        BigDecimal montant
+
+        @Column(name = "mode_paiement", nullable = false, length = 50)
+        String modePaiement
+
+        @Column(name = "date_paiement")
+        LocalDateTime datePaiement = LocalDateTime.now()
+
+        @Column(length = 100)
+        String reference
+    }
+

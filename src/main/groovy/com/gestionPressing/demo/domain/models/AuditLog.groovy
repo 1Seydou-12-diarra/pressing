@@ -17,15 +17,28 @@ import java.time.LocalDateTime
 
 @ToString(includeNames = true)
 class AuditLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    String action
-    String entite
-    Long entiteId
-    String utilisateur
-    String detailsJson
-    LocalDateTime timestamp
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
 
-}
+        @Column(nullable = false, length = 100)
+        String action
+
+        @Column(nullable = false, length = 100)
+        String entite
+
+        @Column(name = "entite_id")
+        Long entiteId
+
+        @Column(length = 150)
+        String utilisateur
+
+        @Column(name = "details_json", columnDefinition = "jsonb")
+        String detailsJson
+
+        @Column(name = "timestamp")
+        LocalDateTime timestamp = LocalDateTime.now()
+    }
+
+

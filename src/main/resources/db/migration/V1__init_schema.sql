@@ -115,8 +115,8 @@ CREATE TABLE produit_stock (
     id BIGSERIAL PRIMARY KEY,
     agence_id BIGINT NOT NULL,
     nom VARCHAR(150) NOT NULL,
-    quantite NUMERIC(10,2) NOT NULL,
-    seuil_alerte NUMERIC(10,2),
+    quantite INTEGER NOT NULL,
+    seuil_alerte INTEGER NOT NULL,
     unite VARCHAR(30) NOT NULL,
 
     CONSTRAINT fk_stock_agence
@@ -150,7 +150,7 @@ CREATE TABLE audit_log (
     entite VARCHAR(100) NOT NULL,
     entite_id BIGINT,
     utilisateur VARCHAR(150),
-    details_json JSONB,
+    details_json VARCHAR(150),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

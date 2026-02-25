@@ -12,33 +12,42 @@ import java.time.LocalDateTime
 @Canonical
 @ToString(includeNames = true)
 class Commande {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    Client client
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
 
-    @ManyToOne
-    @JoinColumn(name = "agence_id")
-    Agence agence
+        @ManyToOne
+        @JoinColumn(name = "client_id", nullable = false)
+        Client client
 
-    @ManyToOne
-    @JoinColumn(name = "employe_id")
-    Employe employe
+        @ManyToOne
+        @JoinColumn(name = "agence_id")
+        Agence agence
 
-    String statut
-    BigDecimal montantTotal
-    LocalDateTime dateDepot
-    LocalDateTime dateRetraitPrevue
+        @ManyToOne
+        @JoinColumn(name = "employe_id")
+        Employe employe
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
-    List<ArticleCommande> articles = []
+        @Column(nullable = false, length = 30)
+        String statut
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
-    List<Paiement> paiements = []
+        @Column(name = "montant_total", columnDefinition = "numeric(12,2) default 0")
+        BigDecimal montantTotal = 0
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
-    List<HistoriqueStatut> historiques = []
-}
+        @Column(name = "date_depot")
+        LocalDateTime dateDepot = LocalDateTime.now()
+
+        @Column(name = "date_retrait_prevue")
+        LocalDateTime dateRetraitPrevue
+
+        @OneToMany(mappedBy = "commande")
+        List<ArticleCommande> articles
+
+        @OneToMany(mappedBy = "commande")
+        List<Paiement> paiements
+
+        @OneToMany(mappedBy = "commande")
+        List<HistoriqueStatut> historiques
+    }
+

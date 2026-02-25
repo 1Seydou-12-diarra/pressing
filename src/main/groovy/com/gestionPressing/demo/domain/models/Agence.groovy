@@ -9,23 +9,38 @@ import jakarta.persistence.*
 @Table(name = "agence")
 @Canonical
 @ToString(includeNames = true)
-class Agence {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    String nom
-    String adresse
-    String telephone
-    String codeAgence
-    Boolean actif
+    class Agence {
 
-    @OneToMany(mappedBy = "agence")
-    List<Employe> employes = []
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
 
-    @OneToMany(mappedBy = "agence")
-    List<Commande> commandes = []
+        @Column(nullable = false, length = 150)
+        String nom
 
-    @OneToMany(mappedBy = "agence")
-    List<ProduitStock> produitsStock = []
-}
+        @Column(columnDefinition = "TEXT")
+        String adresse
+
+        @Column(length = 30)
+        String telephone
+
+        @Column(name = "code_agence", nullable = false, unique = true, length = 50)
+        String codeAgence
+
+        @Column(columnDefinition = "boolean default true")
+        Boolean actif = true
+
+        @OneToMany(mappedBy = "agence")
+        List<Employe> employes
+
+        @OneToMany(mappedBy = "agence")
+        List<Commande> commandes
+
+        @OneToMany(mappedBy = "agence")
+        List<ProduitStock> stocks
+    }
+
+
+
+

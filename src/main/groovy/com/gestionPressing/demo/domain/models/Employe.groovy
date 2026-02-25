@@ -10,23 +10,37 @@ import jakarta.persistence.*
 @Canonical
 @ToString(includeNames = true)
 class Employe {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    String keycloakId
-    String nom
-    String prenom
-    String role
-    Boolean actif
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
 
-    @ManyToOne
-    @JoinColumn(name = "agence_id")
-    Agence agence
+        @Column(name = "keycloak_id", nullable = false, unique = true, length = 100)
+        String keycloakId
 
-    @OneToMany(mappedBy = "employe")
-    List<Commande> commandes = []
+        @Column(nullable = false, length = 100)
+        String nom
 
-    @OneToMany(mappedBy = "employe")
-    List<HistoriqueStatut> historiques = []
-}
+        @Column(nullable = false, length = 100)
+        String prenom
+
+        @Column(nullable = false, length = 50)
+        String role
+
+        @ManyToOne
+        @JoinColumn(name = "agence_id")
+        Agence agence
+
+        @Column(columnDefinition = "boolean default true")
+        Boolean actif = true
+
+        @OneToMany(mappedBy = "employe")
+        List<Commande> commandes
+
+        @OneToMany(mappedBy = "employe")
+        List<HistoriqueStatut> historiques
+    }
+
+
+
+

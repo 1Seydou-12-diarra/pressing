@@ -10,16 +10,24 @@ import jakarta.persistence.*
 @Canonical
 @ToString(includeNames = true)
 class ProduitStock {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    @ManyToOne
-    @JoinColumn(name = "agence_id")
-    Agence agence
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
 
-    String nom
-    Integer quantite
-    Integer seuilAlerte
-    String unite
-}
+        @ManyToOne
+        @JoinColumn(name = "agence_id", nullable = false)
+        Agence agence
+
+        @Column(nullable = false, length = 150)
+        String nom
+
+        @Column(nullable = false)
+        Integer quantite
+
+        @Column(name = "seuil_alerte", nullable = false)
+        Integer seuilAlerte
+
+        @Column(nullable = false, length = 30)
+        String unite
+    }

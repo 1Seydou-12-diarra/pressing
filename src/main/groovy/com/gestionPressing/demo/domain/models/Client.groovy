@@ -10,20 +10,40 @@ import java.time.LocalDateTime
 @Table(name = "client")
 @Canonical
 @ToString(includeNames = true)
-class Client {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id
 
-    String nom
-    String prenom
-    String telephone
-    String email
-    String adresse
-    Integer pointsFidelite
-    Boolean actif
-    LocalDateTime dateCreation
+    class Client {
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
-    List<Commande> commandes = []
-}
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long id
+
+        @Column(nullable = false, length = 100)
+        String nom
+
+        @Column(length = 100)
+        String prenom
+
+        @Column(nullable = false, length = 30, unique = true)
+        String telephone
+
+        @Column(length = 150)
+        String email
+
+        @Column(columnDefinition = "TEXT")
+        String adresse
+
+        @Column(name = "points_fidelite", columnDefinition = "int default 0")
+        Integer pointsFidelite = 0
+
+        @Column(columnDefinition = "boolean default true")
+        Boolean actif = true
+
+        @Column(name = "date_creation")
+        LocalDateTime dateCreation = LocalDateTime.now()
+
+        @OneToMany(mappedBy = "client")
+        List<Commande> commandes
+    }
+
+
+

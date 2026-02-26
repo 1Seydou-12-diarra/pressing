@@ -74,12 +74,11 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 10
-      start_period: 90s  # augmenté pour laisser Keycloak démarrer complètement
-
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1" ]
+      interval: 30s        # vérifie toutes les 30 secondes
+      timeout: 10s         # timeout de la commande curl
+      retries: 20          # jusqu'à 20 essais
+      start_period: 120s   # laisse 2 minutes à Keycloak pour démarrer complètement
   # ─────────────────────────────────────────
   # 3. Zookeeper
   # ─────────────────────────────────────────

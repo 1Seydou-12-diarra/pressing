@@ -2,6 +2,7 @@ package com.gestionPressing.demo.infrastructure.persistence
 
 import com.gestionPressing.demo.domain.models.Commande
 import com.gestionPressing.demo.domain.ports.output.CommandeRepositoryPort
+import com.gestionPressing.demo.infrastructure.repositories.CommandeJpaRepository
 import org.springframework.stereotype.Component
 
 @Component

@@ -1,4 +1,4 @@
-package com.gestionPressing.demo.infrastructure.persistence
+package com.gestionPressing.demo.infrastructure.repositories
 
 import com.gestionPressing.demo.domain.models.Commande
 import org.springframework.data.jpa.repository.JpaRepository

@@ -1,5 +1,6 @@
 package com.gestionPressing.demo.domain.ports.input
 
+import com.gestionPressing.demo.application.dtos.CommandeResponse
 import com.gestionPressing.demo.domain.enums.StatutCommande
 import com.gestionPressing.demo.domain.models.Commande
 
@@ -24,14 +25,15 @@ interface CreerCommandeUseCase {
                    String clientTelephone,
                    String description,
                    Double montantTotal,
-                   String acteurId)
+                   String agenceId,
+                   String employeId)
 }
 
 // ─── Use Case 2 : Changer le statut d'une commande ───────────────────────────
 interface ChangerStatutCommandeUseCase {
     Commande changerStatut(String commandeId,
                            StatutCommande nouveauStatut,
-                           String acteurId)
+                           String employeId)
 }
 
 // ─── Use Case 3 : Consulter une commande ─────────────────────────────────────

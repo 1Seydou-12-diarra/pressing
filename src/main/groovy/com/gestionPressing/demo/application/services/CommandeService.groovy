@@ -3,44 +3,66 @@ package com.gestionPressing.demo.application.services
 import com.gestionPressing.demo.application.dtos.ArticleCommandeResponse
 import com.gestionPressing.demo.application.dtos.CommandeResponse
 import com.gestionPressing.demo.application.dtos.CreerCommandeRequest
-import com.gestionPressing.demo.application.usecase.ChangerStatutCommandeUseCaseImpl
-import com.gestionPressing.demo.application.usecase.ConsulterCommandeService
-import com.gestionPressing.demo.application.usecase.CreerCommandeUseCaseImpl
 import com.gestionPressing.demo.domain.enums.StatutCommande
 import com.gestionPressing.demo.domain.exception.CommandeNotFoundException
 import com.gestionPressing.demo.domain.models.ArticleCommande
 import com.gestionPressing.demo.domain.models.Commande
 import com.gestionPressing.demo.domain.models.HistoriqueStatut
-import com.gestionPressing.demo.domain.ports.output.AuditEventPublisherPort
+import com.gestionPressing.demo.domain.ports.input.ChangerStatutCommandeUseCase
+import com.gestionPressing.demo.domain.ports.input.ConsulterCommandeUseCase
+import com.gestionPressing.demo.domain.ports.input.CreerCommandeUseCase
 import com.gestionPressing.demo.domain.ports.output.CommandeEventPublisherPort
 import com.gestionPressing.demo.domain.ports.output.CommandeRepositoryPort
-import com.gestionPressing.demo.domain.ports.output.NotificationEventPublisherPort
-import com.gestionPressing.demo.infrastructure.repositories.CommandeJpaRepository
 import com.gestionPressing.demo.infrastructure.repositories.HistoriqueStatutRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class CommandeService extends CreerCommandeUseCaseImpl, ChangerStatutCommandeUseCaseImpl, ConsulterCommandeService {
+class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseCase, ConsulterCommandeUseCase {
 
-    private final CommandeJpaRepository commandeRepository
+    private final CommandeRepositoryPort commandeRepository
     private final HistoriqueStatutRepository historiqueRepository
     private final CommandeEventPublisherPort eventPublisher
 
-    CommandeService(CommandeRepositoryPort commandeRepository, CommandeEventPublisherPort commandeEventPublisher, NotificationEventPublisherPort notificationPublisher, AuditEventPublisherPort auditPublisher, CommandeJpaRepository commandeRepository1, HistoriqueStatutRepository historiqueRepository, CommandeEventPublisherPort eventPublisher) {
-        super(commandeRepository, commandeEventPublisher, notificationPublisher, auditPublisher)
-        this.commandeRepository = commandeRepository1
+    CommandeService(CommandeRepositoryPort commandeRepository,
+                    HistoriqueStatutRepository historiqueRepository,
+                    CommandeEventPublisherPort eventPublisher) {
+        this.commandeRepository = commandeRepository
         this.historiqueRepository = historiqueRepository
         this.eventPublisher = eventPublisher
     }
-// ─────────────────────────────────────────
-    // CRÉATION D’UNE COMMANDE (DÉPÔT)
-    // ─────────────────────────────────────────
 
+    // ─────────────────────────────────────────
+    // IMPLEMENTATION DE L'INTERFACE CREERCOMMANDEUSECASE
+    // ─────────────────────────────────────────
     @Override
+    Commande creer(String clientId, String clientEmail, String clientTelephone,
+                   String description, Double montantTotal, String agenceId, String employeId) {
+
+        // Construire un CreerCommandeRequest interne pour réutiliser la logique existante
+        def request = new CreerCommandeRequest(
+                clientId: clientId,
+                agenceId: agenceId as Long,
+                employeId: employeId as Long,
+                articles: [], // si tu veux passer des articles
+                dateRetraitPrevue: null
+        )
+
+        // Appelle la méthode interne qui contient la logique métier
+        CommandeResponse response = creerCommande(request)
+
+        // Retourne l'entité Commande pour respecter la signature de l'interface
+        return commandeRepository.findById(response.id)
+                .orElseThrow { new CommandeNotFoundException(response.id) }
+    }
+
+    // ─────────────────────────────────────────
+    // LOGIQUE MÉTIER DE CRÉATION DE COMMANDE
+    // ─────────────────────────────────────────
     CommandeResponse creerCommande(CreerCommandeRequest request) {
 
+        // Mapper les articles
         def articles = request.articles.collect { req ->
             ArticleCommande.creer(
                     req.typeVetement,
@@ -51,6 +73,7 @@ class CommandeService extends CreerCommandeUseCaseImpl, ChangerStatutCommandeUse
             )
         }
 
+        // Créer l’agrégat commande
         def commande = Commande.creerDepot(
                 request.clientId,
                 request.agenceId,
@@ -59,96 +82,79 @@ class CommandeService extends CreerCommandeUseCaseImpl, ChangerStatutCommandeUse
                 request.dateRetraitPrevue
         )
 
-        // ✅ CALCUL AUTOMATIQUE DU MONTANT
+        // Calcul automatique du montant
         commande.montantTotal = articles.sum { it.tarifUnitaire ?: 0 } ?: 0
 
+        // Persister
         def saved = commandeRepository.save(commande)
 
+        // Historique initial
         def historique = HistoriqueStatut.creer(
                 saved.id,
                 null,
                 StatutCommande.DEPOSE,
                 request.employeId
         )
-
         historiqueRepository.save(historique)
 
+        // Événement Kafka
         eventPublisher.publierCommandeCreee(saved)
 
         return toResponse(saved)
     }
 
     // ─────────────────────────────────────────
-    // CHANGEMENT DE STATUT
+    // CHANGER LE STATUT
     // ─────────────────────────────────────────
-
     @Override
-    CommandeResponse changerStatut(Long commandeId,
-                                   StatutCommande nouveauStatut,
-                                   Long employeId) {
+    Commande changerStatut(String commandeId,
+                           StatutCommande nouveauStatut,
+                           String employeId) {
 
         def commande = commandeRepository.findById(commandeId)
                 .orElseThrow { new CommandeNotFoundException(commandeId) }
 
         def ancienStatut = commande.statut
 
+        // Validation workflow
         commande.changerStatut(nouveauStatut)
 
+        // Persister
         def saved = commandeRepository.save(commande)
 
+        // Historique
         def historique = HistoriqueStatut.creer(
-                commandeId,
+                saved.id,
                 ancienStatut,
                 nouveauStatut,
                 employeId
         )
-
         historiqueRepository.save(historique)
 
         eventPublisher.publierStatutChange(saved)
 
-        return toResponse(saved)
+        return saved
     }
 
     // ─────────────────────────────────────────
-    // CONSULTATION
+    // IMPLEMENTATION DE L'INTERFACE CONSULTERCOMMANDEUSECASE
     // ─────────────────────────────────────────
-
     @Override
-    @Transactional(readOnly = true)
-    CommandeResponse getById(Long id) {
-        def commande = commandeRepository.findById(id)
-                .orElseThrow { new CommandeNotFoundException(id) }
-        return toResponse(commande)
+    Commande consulter(String commandeId) {
+        return commandeRepository.findById(commandeId)
+                .orElseThrow { new CommandeNotFoundException(commandeId) }
     }
 
     @Override
-    @Transactional(readOnly = true)
-    List<CommandeResponse> getByClient(Long clientId) {
-        commandeRepository.findByClientId(clientId)
-                .collect { toResponse(it) }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    List<CommandeResponse> getByStatut(StatutCommande statut) {
-        commandeRepository.findByStatut(statut)
-                .collect { toResponse(it) }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    List<CommandeResponse> getByAgence(Long agenceId) {
-        commandeRepository.findByAgenceId(agenceId)
-                .collect { toResponse(it) }
+    List<Commande> consulterParClient(String clientId) {
+        return commandeRepository.findByClientId(clientId)
     }
 
     // ─────────────────────────────────────────
     // MAPPER ENTITY → DTO
     // ─────────────────────────────────────────
-
     private static CommandeResponse toResponse(Commande c) {
-        new CommandeResponse(
+        return new CommandeResponse(
                 id: c.id,
                 clientId: c.clientId,
                 agenceId: c.agenceId,

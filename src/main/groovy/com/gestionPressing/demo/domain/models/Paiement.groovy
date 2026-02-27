@@ -33,5 +33,8 @@ class Paiement {
 
         @Column(length = 100)
         String reference
+    /**
+     * Indique si c'est un remboursement
+     */
     }
 

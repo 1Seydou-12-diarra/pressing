@@ -1,5 +1,6 @@
 package com.gestionPressing.demo.application.dtos
 
+import com.gestionPressing.demo.domain.enums.StatutArticle
 import com.gestionPressing.demo.domain.enums.StatutCommande
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*

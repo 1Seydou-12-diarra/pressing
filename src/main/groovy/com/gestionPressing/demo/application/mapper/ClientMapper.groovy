@@ -3,11 +3,12 @@ package com.gestionPressing.demo.application.mapper
 import com.gestionPressing.demo.application.dtos.ClientRequestDto
 import com.gestionPressing.demo.application.dtos.ClientResponseDto
 import com.gestionPressing.demo.domain.models.Client
+import org.springframework.stereotype.Component
 
-
+@Component
 class ClientMapper {
 
-    static Client toDomain(ClientRequestDto dto) {
+    Client toDomain(ClientRequestDto dto) {
         new Client(
                 nom: dto.nom,
                 prenom: dto.prenom,
@@ -17,7 +18,7 @@ class ClientMapper {
         )
     }
 
-    static ClientResponseDto toDto(Client client) {
+    ClientResponseDto toDto(Client client) {
         new ClientResponseDto(
                 id: client.id,
                 nom: client.nom,

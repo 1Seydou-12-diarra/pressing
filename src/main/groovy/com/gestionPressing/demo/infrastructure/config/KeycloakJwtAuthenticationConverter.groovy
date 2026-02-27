@@ -19,9 +19,13 @@ class KeycloakJwtAuthenticationConverter extends JwtAuthenticationConverter {
             def realmAccess = jwt.getClaim("realm_access")
             def roles = realmAccess?.get("roles") ?: []
 
+            println("Roles dans le token: $roles")
+
             roles.collect { role ->
-                // ON NE MODIFIE PAS LE NOM DU RÔLE
-                new SimpleGrantedAuthority(role.toString())
+                def cleanRole = role.toString().trim()
+                def finalRole = cleanRole.startsWith("ROLE_") ? cleanRole : "ROLE_$cleanRole"
+                println("ROLE EXTRACTED: '$finalRole'")
+                new SimpleGrantedAuthority(finalRole)
             }
         }
     }

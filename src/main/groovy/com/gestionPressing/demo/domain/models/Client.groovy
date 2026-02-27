@@ -43,6 +43,17 @@ import java.time.LocalDateTime
 
         @OneToMany(mappedBy = "client")
         List<Commande> commandes
+
+    void ajouterPoints(int points) {
+        this.pointsFidelite += points
+    }
+
+    void utiliserPoints(int points) {
+        if (points > pointsFidelite) {
+            throw new IllegalStateException("Points insuffisants")
+        }
+        this.pointsFidelite -= points
+    }
     }
 
 

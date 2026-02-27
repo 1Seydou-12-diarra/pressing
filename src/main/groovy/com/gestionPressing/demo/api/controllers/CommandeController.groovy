@@ -1,80 +1,84 @@
 package com.gestionPressing.demo.api.controllers
 
 import com.gestionPressing.demo.application.dtos.ChangerStatutRequest
-import com.gestionPressing.demo.application.dtos.CommandeRequest
 import com.gestionPressing.demo.application.dtos.CommandeResponse
-import com.gestionPressing.demo.application.mapper.CommandeRestMapper
+import com.gestionPressing.demo.application.dtos.CreerCommandeRequest
+import com.gestionPressing.demo.domain.enums.StatutCommande
 import com.gestionPressing.demo.domain.ports.input.ChangerStatutCommandeUseCase
 import com.gestionPressing.demo.domain.ports.input.ConsulterCommandeUseCase
 import com.gestionPressing.demo.domain.ports.input.CreerCommandeUseCase
-import groovy.util.logging.Slf4j
-import org.springframework.http.HttpStatus
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
-/**
- * ═══════════════════════════════════════════════════════════
- *  EXPOSITION — Adaptateur d'ENTRÉE REST
- *  Couche : exposition/rest/controller
- *
- *  Appelle UNIQUEMENT les ports d'entrée (interfaces).
- *  Ne connaît pas les use cases concrets.
- *  Ne fait PAS de logique métier.
- * ═══════════════════════════════════════════════════════════
- */
-@Slf4j
+
 @RestController
-@RequestMapping('/api/v1/commandes')
+@RequestMapping("/api/commandes")
 class CommandeController {
 
-    // Injection par INTERFACES (ports d'entrée), pas par implémentations
     private final CreerCommandeUseCase creerCommandeUseCase
     private final ChangerStatutCommandeUseCase changerStatutUseCase
-    private final ConsulterCommandeUseCase consulterCommandeUseCase
-    private final CommandeRestMapper mapper
+    private final ConsulterCommandeUseCase consulterUseCase
 
     CommandeController(CreerCommandeUseCase creerCommandeUseCase,
                        ChangerStatutCommandeUseCase changerStatutUseCase,
-                       ConsulterCommandeUseCase consulterCommandeUseCase,
-                       CommandeRestMapper mapper) {
-        this.creerCommandeUseCase   = creerCommandeUseCase
-        this.changerStatutUseCase   = changerStatutUseCase
-        this.consulterCommandeUseCase = consulterCommandeUseCase
-        this.mapper                 = mapper
+                       ConsulterCommandeUseCase consulterUseCase) {
+        this.creerCommandeUseCase = creerCommandeUseCase
+        this.changerStatutUseCase = changerStatutUseCase
+        this.consulterUseCase     = consulterUseCase
     }
+
+    // ─── CRÉER UN DÉPÔT ─────────────────────────────────────
 
     @PostMapping
-    ResponseEntity<CommandeResponse> creer(@RequestBody CommandeRequest request,
-                                           @RequestHeader('X-User-Id') String acteurId) {
-        log.info("POST /commandes - client: {}", request.clientId)
-        def commande = creerCommandeUseCase.creer(
-                request.clientId, request.clientEmail, request.clientTelephone,
-                request.description, request.montantTotal, acteurId
-        )
-        ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(commande))
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_CAISSIER')")
+    ResponseEntity<CommandeResponse> creerCommande(
+            @Valid @RequestBody CreerCommandeRequest request) {
+        def response = creerCommandeUseCase.creerCommande(request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
-    @PatchMapping('/{commandeId}/statut')
-    ResponseEntity<CommandeResponse> changerStatut(@PathVariable String commandeId,
-                                                   @RequestBody ChangerStatutRequest request,
-                                                   @RequestHeader('X-User-Id') String acteurId) {
-        log.info("PATCH /commandes/{}/statut → {}", commandeId, request.nouveauStatut)
-        def commande = changerStatutUseCase.changerStatut(
-                commandeId, StatutCommande.valueOf(request.nouveauStatut), acteurId
-        )
-        ResponseEntity.ok(mapper.toResponse(commande))
+    // ─── CHANGER LE STATUT ───────────────────────────────────
+
+    @PatchMapping("/{id}/statut")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_MANAGER')")
+    ResponseEntity<CommandeResponse> changerStatut(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangerStatutRequest request) {
+        def response = changerStatutUseCase.changerStatut(id, request.nouveauStatut, request.employeId)
+        return ResponseEntity.ok(response)
     }
 
-    @GetMapping('/{commandeId}')
-    ResponseEntity<CommandeResponse> consulter(@PathVariable String commandeId) {
-        def commande = consulterCommandeUseCase.consulter(commandeId)
-        ResponseEntity.ok(mapper.toResponse(commande))
+    // ─── CONSULTATION ────────────────────────────────────────
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    ResponseEntity<CommandeResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(consulterUseCase.getById(id))
     }
 
-    @GetMapping('/client/{clientId}')
-    ResponseEntity<List<CommandeResponse>> consulterParClient(@PathVariable String clientId) {
-        def commandes = consulterCommandeUseCase.consulterParClient(clientId)
-        ResponseEntity.ok(commandes.collect { mapper.toResponse(it) })
+    @GetMapping("/client/{clientId}")
+    @PreAuthorize("isAuthenticated()")
+    ResponseEntity<List<CommandeResponse>> getByClient(@PathVariable Long clientId) {
+        return ResponseEntity.ok(consulterUseCase.getByClient(clientId))
+    }
+
+    @GetMapping("/statut/{statut}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_MANAGER')")
+    ResponseEntity<List<CommandeResponse>> getByStatut(@PathVariable StatutCommande statut) {
+        return ResponseEntity.ok(consulterUseCase.getByStatut(statut))
+    }
+
+    @GetMapping("/agence/{agenceId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_MANAGER')")
+    ResponseEntity<List<CommandeResponse>> getByAgence(@PathVariable Long agenceId) {
+        return ResponseEntity.ok(consulterUseCase.getByAgence(agenceId))
     }
 }

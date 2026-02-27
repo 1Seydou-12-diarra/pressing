@@ -54,6 +54,10 @@ compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
 }
 
+tasks.withType(GroovyCompile).configureEach {
+    groovyOptions.parameters = true
+}
+
 tasks.named('bootBuildImage') {
     runImage = 'paketobuildpacks/ubuntu-noble-run:latest'
 }

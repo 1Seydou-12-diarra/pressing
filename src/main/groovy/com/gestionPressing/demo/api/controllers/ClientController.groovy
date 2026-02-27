@@ -30,6 +30,7 @@ class ClientController {
     ClientResponseDto trouver(@PathVariable Long id) {
         mapper.toDto(service.trouverParId(id))
     }
+    //GET http://localhost:8283/api/clients?nom=Jean
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_MANAGER')")
     @GetMapping
@@ -54,7 +55,7 @@ class ClientController {
     //}
 
 
-    @PreAuthorize("hasAnyRole('ADMIN','CAISSIER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN','ROLE_CAISSIER')")
     @PostMapping("/{id}/fidelite/credit")
     void crediter(
             @PathVariable Long id,
@@ -63,7 +64,7 @@ class ClientController {
         service.crediterPoints(id, montant)
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','CAISSIER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN','ROLE_CAISSIER')")
     @PostMapping("/{id}/fidelite/utiliser")
     void utiliser(
             @PathVariable Long id,
@@ -72,7 +73,7 @@ class ClientController {
         service.utiliserPoints(id, points)
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN','ROLE_EMPLOYE')")
     @GetMapping("/{id}/fidelite")
     int solde(@PathVariable Long id) {
         service.trouverParId(id).pointsFidelite

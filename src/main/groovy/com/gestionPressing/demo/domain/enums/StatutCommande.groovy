@@ -1,21 +1,28 @@
 package com.gestionPressing.demo.domain.enums
 
-
-/**
- * ═══════════════════════════════════════════════════════════
- *  DOMAINE — Enum StatutCommande
- *  Couche : domain/model
- *
- *  Valeur métier pure. Aucune dépendance externe.
- *  Utilisé par : Commande, CommandeEventV1, UseCases...
- * ═══════════════════════════════════════════════════════════
- */
 enum StatutCommande {
-    EN_ATTENTE,
-    PRISE_EN_CHARGE,
-    EN_COURS_LAVAGE,
-    EN_COURS_REPASSAGE,
-    PRET,
-    LIVRE,
-    ANNULE
-}
+
+
+        DEPOSE,
+        EN_TRAITEMENT,
+        PRET,
+        RETIRE
+
+        List<StatutCommande> transitionsAutorisees() {
+            switch (this) {
+                case DEPOSE:
+                    return [EN_TRAITEMENT]
+                case EN_TRAITEMENT:
+                    return [PRET]
+                case PRET:
+                    return [RETIRE]
+                case RETIRE:
+                    return []
+            }
+        }
+
+        boolean peutTransitionnerVers(StatutCommande cible) {
+            transitionsAutorisees().contains(cible)
+        }
+    }
+

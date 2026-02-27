@@ -49,5 +49,9 @@ class Commande {
 
         @OneToMany(mappedBy = "commande")
         List<HistoriqueStatut> historiques
+
+        BigDecimal calculerMontantTotal() {
+        articles.sum { it.tarifUnitaire ?: 0 } ?: 0
+       }
     }
 

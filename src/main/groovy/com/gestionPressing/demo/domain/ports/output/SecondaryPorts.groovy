@@ -25,6 +25,7 @@ interface CommandeRepositoryPort {
     Optional<Commande> trouverParId(String commandeId)
     List<Commande> trouverParClientId(String clientId)
     boolean existeParId(String commandeId)
+    Optional<Commande> findById(Long id)
 }
 
 // ─── Ports Publication Événements ─────────────────────────────────────────────

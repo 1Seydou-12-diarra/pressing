@@ -15,8 +15,9 @@ java {
 }
 
 repositories {
-    mavenCentral()
+    mavenCentral()  // uniquement Maven Central
 }
+
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -28,7 +29,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-authorization-server'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    implementation 'net.sf.jasperreports:jasperreports:7.0.3'
+    implementation 'net.sf.jasperreports:jasperreports-fonts:7.0.3'
+    implementation 'com.github.librepdf:openpdf:3.0.1'
+
+
+    // Spring Boot starter
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     // MapStruct
+
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     implementation 'org.apache.groovy:groovy'
@@ -48,6 +59,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+
 }
 // Nécessaire pour MapStruct avec Groovy
 compileGroovy {

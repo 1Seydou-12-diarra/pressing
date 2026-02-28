@@ -41,7 +41,7 @@ class TarifController {
         service.lister()
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_CAISSIER',ROLE_CAISIER)")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_CAISSIER',ROLE_EMPLOYE)")
     @GetMapping("/actif")
     BigDecimal obtenirTarif(
             @RequestParam String typeVetement,

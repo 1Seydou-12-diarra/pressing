@@ -56,4 +56,8 @@ class CommandeJpaAdapter implements CommandeRepositoryPort {
                 montantTotal: e.montantTotal
         )
     }
+    @Override
+    Optional<Commande> findById(Long id) {
+        return repository.findById(id)
+    }
 }

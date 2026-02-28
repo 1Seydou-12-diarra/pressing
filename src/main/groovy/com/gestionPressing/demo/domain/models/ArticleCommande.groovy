@@ -4,6 +4,8 @@ import groovy.transform.Canonical
 import groovy.transform.ToString
 import jakarta.persistence.*
 import com.gestionPressing.demo.domain.enums.StatutCommande
+import com.gestionPressing.demo.domain.models.Commande
+
 
 @Entity
 @Table(name = "article_commande")

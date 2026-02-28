@@ -1,8 +1,6 @@
 package com.gestionPressing.demo.application.services
 
-import com.gestionPressing.demo.application.dtos.ArticleCommandeResponse
-import com.gestionPressing.demo.application.dtos.CommandeResponse
-import com.gestionPressing.demo.application.dtos.CreerCommandeRequest
+import com.gestionPressing.demo.application.dtos.*
 import com.gestionPressing.demo.domain.enums.StatutCommande
 import com.gestionPressing.demo.domain.exception.CommandeNotFoundException
 import com.gestionPressing.demo.domain.models.ArticleCommande
@@ -33,36 +31,26 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
         this.eventPublisher = eventPublisher
     }
 
-    // ─────────────────────────────────────────
-    // IMPLEMENTATION DE L'INTERFACE CREERCOMMANDEUSECASE
-    // ─────────────────────────────────────────
     @Override
     Commande creer(String clientId, String clientEmail, String clientTelephone,
                    String description, Double montantTotal, String agenceId, String employeId) {
 
-        // Construire un CreerCommandeRequest interne pour réutiliser la logique existante
         def request = new CreerCommandeRequest(
-                clientId: clientId,
+                clientId: clientId as Long,
                 agenceId: agenceId as Long,
                 employeId: employeId as Long,
-                articles: [], // si tu veux passer des articles
+                articles: [],
                 dateRetraitPrevue: null
         )
 
-        // Appelle la méthode interne qui contient la logique métier
         CommandeResponse response = creerCommande(request)
 
-        // Retourne l'entité Commande pour respecter la signature de l'interface
         return commandeRepository.findById(response.id)
                 .orElseThrow { new CommandeNotFoundException(response.id) }
     }
 
-    // ─────────────────────────────────────────
-    // LOGIQUE MÉTIER DE CRÉATION DE COMMANDE
-    // ─────────────────────────────────────────
     CommandeResponse creerCommande(CreerCommandeRequest request) {
 
-        // Mapper les articles
         def articles = request.articles.collect { req ->
             ArticleCommande.creer(
                     req.typeVetement,
@@ -73,7 +61,6 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
             )
         }
 
-        // Créer l’agrégat commande
         def commande = Commande.creerDepot(
                 request.clientId,
                 request.agenceId,
@@ -82,13 +69,10 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
                 request.dateRetraitPrevue
         )
 
-        // Calcul automatique du montant
         commande.montantTotal = articles.sum { it.tarifUnitaire ?: 0 } ?: 0
 
-        // Persister
         def saved = commandeRepository.save(commande)
 
-        // Historique initial
         def historique = HistoriqueStatut.creer(
                 saved.id,
                 null,
@@ -97,15 +81,11 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
         )
         historiqueRepository.save(historique)
 
-        // Événement Kafka
         eventPublisher.publierCommandeCreee(saved)
 
         return toResponse(saved)
     }
 
-    // ─────────────────────────────────────────
-    // CHANGER LE STATUT
-    // ─────────────────────────────────────────
     @Override
     Commande changerStatut(String commandeId,
                            StatutCommande nouveauStatut,
@@ -114,20 +94,17 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
         def commande = commandeRepository.findById(commandeId)
                 .orElseThrow { new CommandeNotFoundException(commandeId) }
 
-        def ancienStatut = commande.statut
+        def ancienStatut = StatutCommande.valueOf(commande.statut)
 
-        // Validation workflow
         commande.changerStatut(nouveauStatut)
 
-        // Persister
         def saved = commandeRepository.save(commande)
 
-        // Historique
         def historique = HistoriqueStatut.creer(
                 saved.id,
                 ancienStatut,
                 nouveauStatut,
-                employeId
+                employeId as Long
         )
         historiqueRepository.save(historique)
 
@@ -136,9 +113,6 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
         return saved
     }
 
-    // ─────────────────────────────────────────
-    // IMPLEMENTATION DE L'INTERFACE CONSULTERCOMMANDEUSECASE
-    // ─────────────────────────────────────────
     @Override
     Commande consulter(String commandeId) {
         return commandeRepository.findById(commandeId)
@@ -147,19 +121,16 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
 
     @Override
     List<Commande> consulterParClient(String clientId) {
-        return commandeRepository.findByClientId(clientId)
+        return commandeRepository.findByClientId(clientId as Long)
     }
 
-    // ─────────────────────────────────────────
-    // MAPPER ENTITY → DTO
-    // ─────────────────────────────────────────
     private static CommandeResponse toResponse(Commande c) {
-        return new CommandeResponse(
+        new CommandeResponse(
                 id: c.id,
-                clientId: c.clientId,
-                agenceId: c.agenceId,
-                employeId: c.employeId,
-                statut: c.statut?.name(),
+                clientId: c.client.id,
+                agenceId: c.agence?.id,
+                employeId: c.employe?.id,
+                statut: StatutCommande.valueOf(c.statut),
                 montantTotal: c.montantTotal,
                 dateDepot: c.dateDepot,
                 dateRetraitPrevue: c.dateRetraitPrevue,
@@ -171,7 +142,7 @@ class CommandeService implements CreerCommandeUseCase, ChangerStatutCommandeUseC
                             tarifUnitaire: a.tarifUnitaire,
                             observations: a.observations,
                             codeBarres: a.codeBarres,
-                            statut: a.statut?.name()
+                            statut: a.statut ? StatutArticle.valueOf(a.statut) : null
                     )
                 }
         )

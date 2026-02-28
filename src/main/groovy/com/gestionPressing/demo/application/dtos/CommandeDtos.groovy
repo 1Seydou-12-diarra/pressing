@@ -4,12 +4,11 @@ import com.gestionPressing.demo.domain.enums.StatutArticle
 import com.gestionPressing.demo.domain.enums.StatutCommande
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
-
 import java.time.LocalDateTime
 
 // ─── REQUEST ────────────────────────────────────────────────
-
 class CreerCommandeRequest {
+
     @NotNull(message = "Le client est obligatoire")
     Long clientId
 
@@ -24,13 +23,14 @@ class CreerCommandeRequest {
 }
 
 class ArticleCommandeRequest {
+
     @NotBlank(message = "Le type de vêtement est obligatoire")
     String typeVetement
 
     @NotBlank(message = "Le service est obligatoire")
     String service
 
-    @NotNull
+    @NotNull(message = "Le tarif unitaire est obligatoire")
     @DecimalMin(value = "0.0", message = "Le tarif doit être positif")
     BigDecimal tarifUnitaire
 
@@ -41,6 +41,7 @@ class ArticleCommandeRequest {
 }
 
 class ChangerStatutRequest {
+
     @NotNull(message = "Le nouveau statut est obligatoire")
     StatutCommande nouveauStatut
 
@@ -48,8 +49,8 @@ class ChangerStatutRequest {
 }
 
 // ─── RESPONSE ───────────────────────────────────────────────
-
 class CommandeResponse {
+
     Long id
     Long clientId
     Long agenceId
@@ -62,6 +63,7 @@ class CommandeResponse {
 }
 
 class ArticleCommandeResponse {
+
     Long id
     String typeVetement
     String service

@@ -1,38 +1,38 @@
 package com.gestionPressing.demo.domain.models
 
-
-import groovy.transform.Canonical
-import groovy.transform.ToString
 import jakarta.persistence.*
-
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "historique_statut")
-@Canonical
-@ToString(includeNames = true)
 class HistoriqueStatut {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        Long id
+    @ManyToOne
+    @JoinColumn(name = "commande_id", nullable = false)
+    Commande commande
 
-        @ManyToOne
-        @JoinColumn(name = "commande_id", nullable = false)
-        Commande commande
+    @Column(name = "statut_precedent")
+    String statutPrecedent
 
-        @Column(name = "statut_precedent", length = 30)
-        String statutPrecedent
+    @Column(name = "statut_nouveau", nullable = false)
+    String statutNouveau
 
-        @Column(name = "statut_nouveau", nullable = false, length = 30)
-        String statutNouveau
+    @Column(name = "employe_id")
+    Long employeId
 
-        @ManyToOne
-        @JoinColumn(name = "employe_id")
-        Employe employe
+    @Column(name = "date_changement")
+    LocalDateTime dateChangement = LocalDateTime.now()
 
-        @Column(name = "date_changement")
-        LocalDateTime dateChangement = LocalDateTime.now()
+    static HistoriqueStatut creer(Commande commande, String statutPrecedent, String statutNouveau, Long employeId) {
+        new HistoriqueStatut(
+                commande: commande,
+                statutPrecedent: statutPrecedent,
+                statutNouveau: statutNouveau,
+                employeId: employeId
+        )
     }
-
+}

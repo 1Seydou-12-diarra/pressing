@@ -1,16 +1,12 @@
 package com.gestionPressing.demo.domain.models
 
-import groovy.transform.Canonical
-import groovy.transform.ToString
 import jakarta.persistence.*
-import com.gestionPressing.demo.domain.enums.StatutCommande
-import com.gestionPressing.demo.domain.models.Commande
-
+import groovy.transform.Canonical
+import java.math.BigDecimal
 
 @Entity
 @Table(name = "article_commande")
 @Canonical
-@ToString(includeNames = true)
 class ArticleCommande {
 
     @Id
@@ -21,37 +17,32 @@ class ArticleCommande {
     @JoinColumn(name = "commande_id", nullable = false)
     Commande commande
 
-    @Column(name = "type_vetement", nullable = false, length = 100)
+    @Column(name = "type_vetement", nullable = false)
     String typeVetement
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     String service
 
-    @Column(name = "tarif_unitaire", nullable = false, columnDefinition = "numeric(10,2)")
+    @Column(name = "tarif_unitaire", nullable = false)
     BigDecimal tarifUnitaire
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     String observations
 
-    @Column(name = "code_barres", nullable = false, unique = true, length = 100)
+    @Column(name = "code_barres", nullable = false, unique = true)
     String codeBarres
 
-    @Column(nullable = false, length = 30)
-    String statut
+    @Column(nullable = false)
+    String statut = "DEPOSE"
 
-    // ─── Méthode statique pour créer un article (remplace 'creer')
-    static ArticleCommande creer(String typeVetement,
-                                 String service,
-                                 BigDecimal tarifUnitaire,
-                                 String observations,
-                                 String codeBarres) {
-        return new ArticleCommande(
+    static ArticleCommande creer(String typeVetement, String service, BigDecimal tarif, String observations, String codeBarres) {
+        new ArticleCommande(
                 typeVetement: typeVetement,
                 service: service,
-                tarifUnitaire: tarifUnitaire,
+                tarifUnitaire: tarif,
                 observations: observations,
                 codeBarres: codeBarres,
-                statut: StatutCommande.DEPOSE.name() // statut initial
+                statut: "DEPOSE"
         )
     }
 }

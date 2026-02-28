@@ -1,42 +1,22 @@
-
 package com.gestionPressing.demo.domain.models
 
 import com.gestionPressing.demo.domain.enums.StatutCommande
-import com.gestionPressing.demo.domain.models.Agence
-import com.gestionPressing.demo.domain.models.ArticleCommande
-import com.gestionPressing.demo.domain.models.Client
-import com.gestionPressing.demo.domain.models.Employe
-import com.gestionPressing.demo.domain.models.HistoriqueStatut
-import com.gestionPressing.demo.domain.models.Paiement
+import jakarta.persistence.*
 import groovy.transform.Canonical
 import groovy.transform.ToString
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
-
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "commande")
 @Canonical
 @ToString(includeNames = true)
-
 class Commande {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     Client client
 
@@ -48,30 +28,37 @@ class Commande {
     @JoinColumn(name = "employe_id")
     Employe employe
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    StatutCommande statut
+    String statut = "DEPOSE"
 
-    @Column(name = "montant_total", nullable = false)
+    @Column(name = "montant_total", columnDefinition = "numeric(12,2) default 0")
     BigDecimal montantTotal = 0
 
-    @Column(name = "date_depot", nullable = false, updatable = false)
+    @Column(name = "date_depot")
     LocalDateTime dateDepot = LocalDateTime.now()
 
     @Column(name = "date_retrait_prevue")
     LocalDateTime dateRetraitPrevue
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
     List<ArticleCommande> articles = []
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Paiement> paiements = []
-
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
     List<HistoriqueStatut> historiques = []
 
+    void changerStatut(StatutCommande nouveauStatut) {
+        this.statut = nouveauStatut.name()
+    }
+
     BigDecimal calculerMontantTotal() {
-        if (!articles) return 0
         articles.sum { it.tarifUnitaire ?: 0 } ?: 0
+    }
+
+    static Commande creerDepot(Client client, Agence agence, Employe employe, List<ArticleCommande> articles, LocalDateTime dateRetrait) {
+        def cmd = new Commande(client: client, agence: agence, employe: employe, dateRetraitPrevue: dateRetrait)
+        cmd.articles = articles
+        articles.each { it.commande = cmd }
+        cmd.montantTotal = cmd.calculerMontantTotal()
+        return cmd
     }
 }

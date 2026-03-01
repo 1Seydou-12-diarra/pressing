@@ -10,6 +10,7 @@ import com.gestionPressing.demo.domain.ports.EmployeRepositoryPort
 import com.gestionPressing.demo.domain.ports.output.ClientRepository
 import com.gestionPressing.demo.domain.ports.output.CommandeRepository
 import com.gestionPressing.demo.domain.ports.TarifRepositoryPort
+import org.hibernate.Hibernate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,7 +27,12 @@ class CommandeService {
     private final AgenceRepositoryPort agenceRepositoryPort
     private final EmployeRepositoryPort employeRepositoryPort
 
-    CommandeService(CommandeRepository commandeRepository, TarifRepositoryPort tarifRepository, CommandeMapper mapper, ClientRepository clientRepository, AgenceRepositoryPort agenceRepositoryPort, EmployeRepositoryPort employeRepositoryPort) {
+    CommandeService(CommandeRepository commandeRepository,
+                    TarifRepositoryPort tarifRepository,
+                    CommandeMapper mapper,
+                    ClientRepository clientRepository,
+                    AgenceRepositoryPort agenceRepositoryPort,
+                    EmployeRepositoryPort employeRepositoryPort) {
         this.commandeRepository = commandeRepository
         this.tarifRepository = tarifRepository
         this.mapper = mapper
@@ -47,15 +53,13 @@ class CommandeService {
                 client:            client,
                 agence:            agence,
                 employe:           employe,
-                statut:            StatutCommande.DEPOSE,  // ✅ corrigé
+                statut:            StatutCommande.DEPOSE,
                 dateDepot:         LocalDateTime.now(),
                 dateRetraitPrevue: request.dateRetraitPrevue
         )
 
         commande.articles = request.articles.collect { articleReq ->
-
             def article = mapper.toArticleDomain(articleReq)
-
             def tarif = tarifRepository
                     .findByTypeVetementAndTypeService(articleReq.typeVetement, articleReq.service)
                     .orElseThrow {
@@ -63,17 +67,12 @@ class CommandeService {
                                 "Tarif introuvable pour ${articleReq.typeVetement} / ${articleReq.service}"
                         )
                     }
-
             article.tarifUnitaire = tarif.prix
-
-            // 🔥 LA LIGNE MANQUANTE
             article.commande = commande
-
             article
         }
 
         commande.montantTotal = commande.calculerMontantTotal()
-
         def saved = commandeRepository.save(commande)
         mapper.toResponse(saved)
     }
@@ -97,8 +96,13 @@ class CommandeService {
         commandeRepository.findAll().collect { mapper.toResponse(it) }
     }
 
+    @Transactional(readOnly = true)
     Commande getCommandeDomain(Long id) {
-        commandeRepository.findById(id)
+        Commande commande = commandeRepository.findById(id)
                 .orElseThrow { new RuntimeException("Commande ${id} introuvable") }
+        Hibernate.initialize(commande.articles)
+        Hibernate.initialize(commande.client)
+        Hibernate.initialize(commande.agence)
+        return commande
     }
 }

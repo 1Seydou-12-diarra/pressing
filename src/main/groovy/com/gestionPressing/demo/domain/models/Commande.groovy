@@ -16,21 +16,20 @@ class Commande {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     Client client
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agence_id")
     Agence agence
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employe_id")
     Employe employe
 
     @Enumerated(EnumType.STRING)
     StatutCommande statut = StatutCommande.DEPOSE
-
 
     @Column(name = "montant_total", columnDefinition = "numeric(12,2) default 0")
     BigDecimal montantTotal = 0
@@ -41,15 +40,14 @@ class Commande {
     @Column(name = "date_retrait_prevue")
     LocalDateTime dateRetraitPrevue
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<ArticleCommande> articles = []
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<HistoriqueStatut> historiques = []
 
-
     void changerStatut(StatutCommande nouveauStatut) {
-        this.statut = nouveauStatut  // ✅ garder l'enum
+        this.statut = nouveauStatut
     }
 
     BigDecimal calculerMontantTotal() {

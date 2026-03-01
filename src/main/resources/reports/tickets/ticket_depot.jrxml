@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
-              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
-              name="ticketDepot"
-              pageWidth="226"
-              pageHeight="600"
-              columnWidth="200"
-              leftMargin="10"
-              rightMargin="10"
-              topMargin="10"
-              bottomMargin="10">
+<jasperReport
+        xmlns="http://jasperreports.sourceforge.net/jasperreports"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                        http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+        name="ticketDepot"
+        pageWidth="226"
+        pageHeight="600"
+        columnWidth="200"
+        leftMargin="10"
+        rightMargin="10"
+        topMargin="10"
+        bottomMargin="10">
 
     <parameter name="PARAM_CLIENT" class="java.lang.String"/>
     <parameter name="PARAM_COMMANDE" class="java.lang.Long"/>
     <parameter name="PARAM_AGENCE" class="java.lang.String"/>
-    <parameter name="PARAM_DATE_DEBUT" class="java.lang.String"/>
+    <parameter name="PARAM_DATE_DEBUT" class="java.util.Date"/>
 
     <field name="typeVetement" class="java.lang.String"/>
     <field name="service" class="java.lang.String"/>
@@ -23,53 +24,48 @@
 
     <title>
         <band height="80">
-            <textField isBlankWhenNull="true">
+
+            <staticText>
                 <reportElement x="0" y="0" width="200" height="20"/>
-                <textFieldExpression>
-                    <![CDATA[$P{PARAM_AGENCE} != null ? $P{PARAM_AGENCE} : ""]]>
-                </textFieldExpression>
-            </textField>
-            <textField isBlankWhenNull="true">
+                <text><![CDATA[PRESSING]]></text>
+            </staticText>
+
+            <textField>
                 <reportElement x="0" y="20" width="200" height="20"/>
-                <textFieldExpression>
-                    <![CDATA["Ticket dépôt #" + ($P{PARAM_COMMANDE} != null ? $P{PARAM_COMMANDE} : "")]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA[$P{PARAM_AGENCE}]]></textFieldExpression>
             </textField>
-            <textField isBlankWhenNull="true">
+
+            <textField>
                 <reportElement x="0" y="40" width="200" height="20"/>
-                <textFieldExpression>
-                    <![CDATA["Client : " + ($P{PARAM_CLIENT} != null ? $P{PARAM_CLIENT} : "")]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA["Ticket dépôt #" + $P{PARAM_COMMANDE}]]></textFieldExpression>
             </textField>
-            <textField isBlankWhenNull="true">
+
+            <textField pattern="dd/MM/yyyy">
                 <reportElement x="0" y="60" width="200" height="20"/>
-                <textFieldExpression>
-                    <![CDATA["Date : " + ($P{PARAM_DATE_DEBUT} != null ? $P{PARAM_DATE_DEBUT} : "")]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA[$P{PARAM_DATE_DEBUT}]]></textFieldExpression>
             </textField>
+
         </band>
     </title>
 
     <detail>
         <band height="20">
-            <textField isBlankWhenNull="true">
+
+            <textField>
                 <reportElement x="0" y="0" width="70" height="20"/>
-                <textFieldExpression>
-                    <![CDATA[$F{typeVetement} != null ? $F{typeVetement} : ""]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA[$F{typeVetement}]]></textFieldExpression>
             </textField>
-            <textField isBlankWhenNull="true">
+
+            <textField>
                 <reportElement x="70" y="0" width="70" height="20"/>
-                <textFieldExpression>
-                    <![CDATA[$F{service} != null ? $F{service}.toString() : ""]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA[$F{service}]]></textFieldExpression>
             </textField>
-            <textField isBlankWhenNull="true">
+
+            <textField>
                 <reportElement x="140" y="0" width="60" height="20"/>
-                <textFieldExpression>
-                    <![CDATA[$F{codeBarres} != null ? $F{codeBarres} : ""]]>
-                </textFieldExpression>
+                <textFieldExpression><![CDATA[$F{codeBarres}]]></textFieldExpression>
             </textField>
+
         </band>
     </detail>
 

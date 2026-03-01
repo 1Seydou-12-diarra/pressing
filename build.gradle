@@ -80,3 +80,9 @@ tasks.named('bootBuildImage') {
 tasks.named('test') {
     useJUnitPlatform()
 }
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from('src/main/resources') {
+        include '**/*.jrxml'
+    }
+}

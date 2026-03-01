@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="factureClient" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <parameter name="PARAM_CLIENT" class="java.lang.String"/>
+    <parameter name="PARAM_COMMANDE" class="java.lang.Long"/>
+    <parameter name="PARAM_AGENCE" class="java.lang.String"/>
+    <parameter name="PARAM_DATE_DEBUT" class="java.util.Date"/>
+    <parameter name="PARAM_TOTAL" class="java.math.BigDecimal"/>
+    <parameter name="PARAM_LOGO" class="java.lang.String"/>
+
+    <field name="typeVetement" class="java.lang.String"/>
+    <field name="service" class="java.lang.String"/>
+    <field name="tarifUnitaire" class="java.math.BigDecimal"/>
+    <field name="observations" class="java.lang.String"/>
+
+    <title>
+        <band height="100">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="30"/>
+                <textFieldExpression><![CDATA["Facture #" + $P{PARAM_COMMANDE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="30" width="555" height="20"/>
+                <textFieldExpression><![CDATA["Client : " + $P{PARAM_CLIENT}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="150" height="20"/>
+                <text><![CDATA[Type]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="150" y="0" width="150" height="20"/>
+                <text><![CDATA[Service]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="0" width="100" height="20"/>
+                <text><![CDATA[Prix]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="400" y="0" width="155" height="20"/>
+                <text><![CDATA[Observations]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{typeVetement}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="150" y="0" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{service}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="0" width="100" height="20"/>
+                <textFieldExpression><![CDATA[$F{tarifUnitaire}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="400" y="0" width="155" height="20"/>
+                <textFieldExpression><![CDATA[$F{observations}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="30">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="20"/>
+                <textFieldExpression><![CDATA["Total : " + $P{PARAM_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>

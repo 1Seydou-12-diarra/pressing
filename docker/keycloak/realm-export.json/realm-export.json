@@ -1,0 +1,106 @@
+{
+  "realm": "pressing-realm",
+  "enabled": true,
+  "displayName": "Pressing Management",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 3600,
+  "refreshTokenMaxReuse": 0,
+  "ssoSessionMaxLifespan": 36000,
+
+  "roles": {
+    "realm": [
+      { "name": "ROLE_ADMIN",    "description": "Administrateur système" },
+      { "name": "ROLE_MANAGER",  "description": "Responsable agence" },
+      { "name": "ROLE_CAISSIER", "description": "Réception et caisse" },
+      { "name": "ROLE_OPERATEUR","description": "Opérateur atelier" }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "pressing-api",
+      "name": "Pressing Backend API",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "pressing-api-secret",
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "pressing-frontend",
+      "name": "Pressing Frontend React",
+      "enabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ],
+      "protocolMappers": [
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@pressing.ci",
+      "firstName": "Super",
+      "lastName": "Admin",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "realmRoles": ["ROLE_ADMIN"]
+    },
+    {
+      "username": "manager",
+      "email": "manager@pressing.ci",
+      "firstName": "Jean",
+      "lastName": "Manager",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "manager123", "temporary": false }],
+      "realmRoles": ["ROLE_MANAGER"]
+    },
+    {
+      "username": "caissier",
+      "email": "caissier@pressing.ci",
+      "firstName": "Marie",
+      "lastName": "Caissier",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "caissier123", "temporary": false }],
+      "realmRoles": ["ROLE_CAISSIER"]
+    },
+    {
+      "username": "operateur",
+      "email": "operateur@pressing.ci",
+      "firstName": "Paul",
+      "lastName": "Operateur",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "operateur123", "temporary": false }],
+      "realmRoles": ["ROLE_OPERATEUR"]
+    }
+  ]
+}

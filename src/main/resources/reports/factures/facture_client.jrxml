@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="ticketDepot" pageWidth="226" pageHeight="600" columnWidth="200" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10">
+
+    <parameter name="PARAM_CLIENT" class="java.lang.String"/>
+    <parameter name="PARAM_COMMANDE" class="java.lang.Long"/>
+    <parameter name="PARAM_AGENCE" class="java.lang.String"/>
+    <parameter name="PARAM_DATE_DEBUT" class="java.util.Date"/>
+    <parameter name="PARAM_LOGO" class="java.lang.String"/>
+
+    <field name="typeVetement" class="java.lang.String"/>
+    <field name="service" class="java.lang.String"/>
+    <field name="codeBarres" class="java.lang.String"/>
+
+    <title>
+        <band height="60">
+            <textField>
+                <reportElement x="0" y="0" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$P{PARAM_AGENCE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="20" width="200" height="20"/>
+                <textFieldExpression><![CDATA["Ticket dépôt #" + $P{PARAM_COMMANDE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="40" width="200" height="20"/>
+                <textFieldExpression><![CDATA["Client : " + $P{PARAM_CLIENT}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="100" height="20"/>
+                <textFieldExpression><![CDATA[$F{typeVetement}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="100" y="0" width="100" height="20"/>
+                <textFieldExpression><![CDATA[$F{service}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+</jasperReport>

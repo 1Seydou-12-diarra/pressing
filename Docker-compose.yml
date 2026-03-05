@@ -74,11 +74,12 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1" ]
-      interval: 30s        # vérifie toutes les 30 secondes
-      timeout: 10s         # timeout de la commande curl
-      retries: 20          # jusqu'à 20 essais
-      start_period: 120s   # laisse 2 minutes à Keycloak pour démarrer complètement
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && timeout 3 cat <&3 | grep -q 'UP' || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 20
+      start_period: 120s
+
   # ─────────────────────────────────────────
   # 3. Zookeeper
   # ─────────────────────────────────────────
@@ -92,17 +93,18 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=srvr,stat,ruok"
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_log:/var/lib/zookeeper/log
     networks:
       - pressing-network
     healthcheck:
-      test: [ "CMD-SHELL", "/usr/bin/zookeeper-shell localhost:2181 ls / || exit 1" ]
+      test: ["CMD-SHELL", "echo srvr | nc -w 2 localhost 2181 | grep -q Mode"]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 30s
 
   # ─────────────────────────────────────────
   # 4. Apache Kafka 7.6
@@ -112,8 +114,8 @@ services:
     container_name: pressing-kafka
     restart: unless-stopped
     ports:
-      - "9092:9092"   # Accès depuis l'hôte
-      - "29092:29092" # Accès interne Docker
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -136,10 +138,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:29092 > /dev/null 2>&1 || exit 1"]
-      interval: 15s
+      interval: 10s
       timeout: 10s
-      retries: 10
-      start_period: 30s
+      retries: 15
+      start_period: 60s
 
   # ─────────────────────────────────────────
   # 5. Kafka UI — monitoring visuel

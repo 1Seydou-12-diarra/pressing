@@ -1,4 +1,5 @@
 {
+  "id": "pressing-realm",
   "realm": "pressing-realm",
   "enabled": true,
   "displayName": "Pressing Management",
@@ -12,10 +13,10 @@
 
   "roles": {
     "realm": [
-      { "name": "ROLE_ADMIN",    "description": "Administrateur système" },
-      { "name": "ROLE_MANAGER",  "description": "Responsable agence" },
-      { "name": "ROLE_CAISSIER", "description": "Réception et caisse" },
-      { "name": "ROLE_OPERATEUR","description": "Opérateur atelier" }
+      { "name": "ROLE_ADMIN",     "description": "Administrateur système" },
+      { "name": "ROLE_MANAGER",   "description": "Responsable agence" },
+      { "name": "ROLE_CAISSIER",  "description": "Réception et caisse" },
+      { "name": "ROLE_OPERATEUR", "description": "Opérateur atelier" }
     ]
   },
 
@@ -53,12 +54,14 @@
           "name": "realm-roles-mapper",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
           "config": {
             "claim.name": "realm_access.roles",
             "jsonType.label": "String",
             "multivalued": "true",
             "access.token.claim": "true",
-            "id.token.claim": "true"
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
           }
         }
       ]
@@ -72,6 +75,7 @@
       "firstName": "Super",
       "lastName": "Admin",
       "enabled": true,
+      "emailVerified": true,
       "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
       "realmRoles": ["ROLE_ADMIN"]
     },
@@ -81,6 +85,7 @@
       "firstName": "Jean",
       "lastName": "Manager",
       "enabled": true,
+      "emailVerified": true,
       "credentials": [{ "type": "password", "value": "manager123", "temporary": false }],
       "realmRoles": ["ROLE_MANAGER"]
     },
@@ -90,6 +95,7 @@
       "firstName": "Marie",
       "lastName": "Caissier",
       "enabled": true,
+      "emailVerified": true,
       "credentials": [{ "type": "password", "value": "caissier123", "temporary": false }],
       "realmRoles": ["ROLE_CAISSIER"]
     },
@@ -99,6 +105,7 @@
       "firstName": "Paul",
       "lastName": "Operateur",
       "enabled": true,
+      "emailVerified": true,
       "credentials": [{ "type": "password", "value": "operateur123", "temporary": false }],
       "realmRoles": ["ROLE_OPERATEUR"]
     }

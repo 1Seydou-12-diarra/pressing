@@ -7,6 +7,7 @@ import com.gestionPressing.demo.domain.ports.input.ClientUseCase
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/clients")
 class ClientController {
